@@ -28,6 +28,8 @@ type Context struct {
 	// IgnoreNonCopyableTypes ignore non-copyable types (default is `false`)
 	IgnoreNonCopyableTypes bool
 
+	IgnoreEmpty bool
+
 	// UseGlobalCache if false not use global cache (default is `true`)
 	UseGlobalCache bool
 
@@ -61,12 +63,25 @@ func IgnoreNonCopyableTypes(flag bool) Option {
 	}
 }
 
+func IgnoreEmpty(flag bool) Option {
+	return func(ctx *Context) {
+		ctx.IgnoreEmpty = flag
+	}
+}
+
 // UseGlobalCache config function for setting flag `UseGlobalCache`
 func UseGlobalCache(flag bool) Option {
 	return func(ctx *Context) {
 		ctx.UseGlobalCache = flag
 	}
 }
+
+// func indirect(reflectValue reflect.Value) reflect.Value {
+// 	for reflectValue.Kind() == reflect.Ptr {
+// 		reflectValue = reflectValue.Elem()
+// 	}
+// 	return reflectValue
+// }
 
 // Copy performs deep copy from `src` to `dst`.
 //
@@ -76,7 +91,12 @@ func Copy(dst, src any, options ...Option) (err error) {
 	if src == nil || dst == nil {
 		return fmt.Errorf("%w: source and destination must be non-nil", ErrValueInvalid)
 	}
+
 	dstVal, srcVal := reflect.ValueOf(dst), reflect.ValueOf(src)
+	// if !indirect(srcVal).IsValid() {
+	// 	return fmt.Errorf("%w: source must be non-nil", ErrValueInvalid)
+	// }
+
 	dstType, srcType := dstVal.Type(), srcVal.Type()
 	if dstType.Kind() != reflect.Pointer {
 		return fmt.Errorf("%w: destination must be pointer", ErrTypeInvalid)

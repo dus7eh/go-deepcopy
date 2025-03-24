@@ -12,13 +12,18 @@ type sliceCopier struct {
 
 // Copy implementation of Copy function for slice copier
 func (c *sliceCopier) Copy(dst, src reflect.Value) error {
+	if !src.IsValid() || (src.IsZero() && c.ctx.IgnoreEmpty) {
+		return nil
+	}
+
 	srcLen := src.Len()
 	if dst.Kind() == reflect.Slice { // Slice/Array -> Slice
 		// `src` is nil slice, set `dst` nil
-		if src.Kind() == reflect.Slice && src.IsNil() {
-			dst.Set(reflect.Zero(dst.Type())) // NOTE: Go1.18 has no SetZero
-			return nil
-		}
+		// if src.Kind() == reflect.Slice && src.IsNil() {
+		// 	dst.Set(reflect.Zero(dst.Type())) // NOTE: Go1.18 has no SetZero
+		// 	return nil
+		// }
+
 		newSlice := reflect.MakeSlice(dst.Type(), srcLen, srcLen)
 		for i := 0; i < srcLen; i++ {
 			if err := c.itemCopier.Copy(newSlice.Index(i), src.Index(i)); err != nil {

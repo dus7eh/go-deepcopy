@@ -52,6 +52,7 @@ const (
 	flagCopyBetweenStructFieldAndMethod = 2
 	// flagIgnoreNonCopyableTypes indicates copying will skip copying non-copyable types without raising errors
 	flagIgnoreNonCopyableTypes = 3
+	flagIgnoreEmpty            = 4
 )
 
 // prepare prepares context for copiers
@@ -74,6 +75,9 @@ func (ctx *Context) prepare() {
 	}
 	if ctx.IgnoreNonCopyableTypes {
 		ctx.flags |= 1 << flagIgnoreNonCopyableTypes
+	}
+	if ctx.IgnoreEmpty {
+		ctx.flags |= 1 << flagIgnoreEmpty
 	}
 }
 
